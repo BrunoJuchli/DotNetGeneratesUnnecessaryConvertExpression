@@ -24,7 +24,7 @@ public class CompilerGeneratesUnnecessaryConvertExpression
     }
 
     [Fact]
-    public void ViaGenericType()
+    public void ViaMethodOnGenericTypeWithConstraints()
     {
         var expression = CreateExpression<ClassWithIntProperty>();
 
