@@ -6,7 +6,7 @@ namespace ConvertExpression;
 public class CompilerGeneratesUnnecessaryConvertExpression
 {
     [Fact]
-    public void FromConcreteClass()
+    public void FromClass()
     {
         var expression = ExpressionBuilder<ClassWithIntProperty>.OrderBy(x => x.IntProperty);
 
@@ -24,9 +24,27 @@ public class CompilerGeneratesUnnecessaryConvertExpression
     }
 
     [Fact]
-    public void ViaMethodOnGenericTypeWithConstraints()
+    public void FromClassViaGenericMethodConstrainedToInterface()
     {
-        var expression = CreateExpression<ClassWithIntProperty>();
+        var expression = CreateExpressionConstrainedToInterface<ClassWithIntProperty>();
+
+        AssertExpressionResolvesPropertyValue(expression);
+        AssertIsMemberExpressionWithParameterExpression(expression);
+    }
+
+    [Fact]
+    public void FromInterfaceViaGenericMethodConstrainedToInterface()
+    {
+        var expression = CreateExpressionConstrainedToInterface<IWithIntProperty>();
+
+        AssertExpressionResolvesPropertyValue(expression);
+        AssertIsMemberExpressionWithParameterExpression(expression);
+    }
+
+    [Fact]
+    public void FromClassViaGenericMethodConstrainedToClass()
+    {
+        var expression = CreateExpressionConstrainedToClass<ClassWithIntProperty>();
 
         AssertExpressionResolvesPropertyValue(expression);
         AssertIsMemberExpressionWithParameterExpression(expression);
@@ -54,8 +72,14 @@ public class CompilerGeneratesUnnecessaryConvertExpression
         memberExpression.Expression!.NodeType.Should().Be(ExpressionType.Parameter);
     }
 
-    static Expression<Func<T, int>> CreateExpression<T>()
+    static Expression<Func<T, int>> CreateExpressionConstrainedToInterface<T>()
         where T : IWithIntProperty
+    {
+        return ExpressionBuilder<T>.OrderBy(x => x.IntProperty);
+    }
+
+    static Expression<Func<T, int>> CreateExpressionConstrainedToClass<T>()
+        where T : ClassWithIntProperty
     {
         return ExpressionBuilder<T>.OrderBy(x => x.IntProperty);
     }
