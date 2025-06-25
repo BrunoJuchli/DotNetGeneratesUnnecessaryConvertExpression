@@ -10,13 +10,7 @@ public class CompilerGeneratesUnnecessaryConvertExpression
     {
         var expression = ExpressionBuilder<ClassWithIntProperty>.OrderBy(x => x.IntProperty);
 
-        var instance = new ClassWithIntProperty
-        {
-            IntProperty = 893,
-        };
-
-        expression.Compile().Invoke(instance).Should().Be(instance.IntProperty);
-
+        AssertExpressionResolvesPropertyValue(expression);
         AssertIsMemberExpressionWithParameterExpression(expression);
     }
 
@@ -25,13 +19,7 @@ public class CompilerGeneratesUnnecessaryConvertExpression
     {
         var expression = ExpressionBuilder<IWithIntProperty>.OrderBy(x => x.IntProperty);
 
-        var instance = new ClassWithIntProperty
-        {
-            IntProperty = 893,
-        };
-
-        expression.Compile().Invoke(instance).Should().Be(instance.IntProperty);
-
+        AssertExpressionResolvesPropertyValue(expression);
         AssertIsMemberExpressionWithParameterExpression(expression);
     }
 
@@ -40,14 +28,19 @@ public class CompilerGeneratesUnnecessaryConvertExpression
     {
         var expression = CreateExpression<ClassWithIntProperty>();
 
+        AssertExpressionResolvesPropertyValue(expression);
+        AssertIsMemberExpressionWithParameterExpression(expression);
+    }
+
+    static void AssertExpressionResolvesPropertyValue<T>(Expression<Func<T, int>> expression)
+    where T : IWithIntProperty
+    {
         var instance = new ClassWithIntProperty
         {
             IntProperty = 893,
         };
 
-        expression.Compile().Invoke(instance).Should().Be(instance.IntProperty);
-
-        AssertIsMemberExpressionWithParameterExpression(expression);
+        expression.Compile().Invoke((T)(object)instance).Should().Be(instance.IntProperty);
     }
 
     static void AssertIsMemberExpressionWithParameterExpression<T>(Expression<Func<T, int>> expression)
